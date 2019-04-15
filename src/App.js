@@ -1,12 +1,44 @@
 import React, { Component } from 'react';
 import DigitItem from "./components/digit-item";
+import ErrorMessage from "./components/error-message";
 import './App.css';
 
+const MAX_NUMBER = 1000000;
+
 class App extends Component {
-  state = { numberInput: "", randomNumber: -1 };
+  state = {
+    numberInput: "",
+    randomNumber: -1,
+    error: false
+  };
 
   flip() {
     return Math.random() >= 0.5;
+  }
+
+  onInputNumberChange(e) {
+    let newValue = e.target.value.replace(/[a-z]/gi, "");
+    newValue = Number(newValue);
+    if (newValue > MAX_NUMBER) {
+      this.setState({
+        error: true,
+        numberInput: newValue,
+        randomNumber: -1
+      });
+    }
+    else {
+        this.setState({ numberInput: newValue, error: false });
+    }
+  }
+
+  onFormSubmit(e) {
+    e.preventDefault();
+    if(!this.state.error) {
+        this.randomNumber(this.state.numberInput);
+    }
+    else {
+      throw Error;
+    }
   }
 
   randomNumber(n) {
@@ -36,7 +68,8 @@ class App extends Component {
 
   render() {
     let numberCard = null;
-    if (this.state.randomNumber >= 0) {
+    let errorMessage = null;
+    if (this.state.randomNumber >= 0 && !this.state.error) {
       numberCard = (
         <DigitItem
           numberMeaning="Random Number"
@@ -44,29 +77,23 @@ class App extends Component {
         />
       );
     }
+    else if(this.state.error) {
+      errorMessage = <ErrorMessage maxNumber={MAX_NUMBER} />
+    }
+
     return (
       <div className="flex-container">
         <form
-          onSubmit={e => {
-            e.preventDefault();
-            this.randomNumber(this.state.numberInput);
-          }}
+          onSubmit={this.onFormSubmit.bind(this)}
         >
           <label>Number: </label>
           <input
             value={this.state.numberInput}
-            onChange={e => {
-              let newValue = e.target.value.replace(/[a-z]/gi, "");
-              newValue = Number(newValue);
-              if (newValue > 1000000) {
-                this.setState({ randomNumber: -1 });
-                throw Error;
-              }
-              this.setState({ numberInput: newValue });
-            }}
+            onChange={this.onInputNumberChange.bind(this)}
           />
           <button>Generate</button>
         </form>
+        {errorMessage}
         {numberCard}
       </div>
     );
