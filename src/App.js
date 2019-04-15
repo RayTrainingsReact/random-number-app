@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import DigitItem from "./components/digit-item";
 import './App.css';
 
-class App extends React.Component {
+class App extends Component {
   state = { numberInput: "", randomNumber: -1 };
 
   flip() {
